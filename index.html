@@ -84,7 +84,7 @@ header('Location: cart.php');
 &lt;script&gt;
 function addReview() {
     let t = document.getElementById('reviewInput').value.trim();
-    if (!t) return alert('Напишите отзыв');
+    if (!t) return;
     let d = document.createElement('div');
     d.className = 'border p-2 mt-2';
     d.textContent = t;
@@ -117,7 +117,7 @@ function sendFeedback() {
     let n = document.getElementById('fbName').value.trim();
     let e = document.getElementById('fbEmail').value.trim();
     let m = document.getElementById('fbMsg').value.trim();
-    if (!n || !e || !m) return alert('Заполните все поля');
+    if (!n || !e || !m) return;
     document.getElementById('fbName').value = '';
     document.getElementById('fbEmail').value = '';
     document.getElementById('fbMsg').value = '';
@@ -154,16 +154,13 @@ function sendFeedback() {
         function copyCode(id) {
             const el = document.getElementById(id);
             const text = el.textContent.trim();
-            navigator.clipboard.writeText(text).then(() => {
-                alert('Скопировано!');
-            }).catch(() => {
+            navigator.clipboard.writeText(text).catch(() => {
                 const ta = document.createElement('textarea');
                 ta.value = text;
                 document.body.appendChild(ta);
                 ta.select();
                 document.execCommand('copy');
                 document.body.removeChild(ta);
-                alert('Скопировано!');
             });
         }
     </script>
