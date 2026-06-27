@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Код-хелпер</title>
+    <style>
+        body { background: white; font-family: Arial, sans-serif; padding: 20px; }
+        .btn-copy { 
+            background: #e0e0e0; color: black; border: 1px solid #aaa; 
+            padding: 8px 16px; border-radius: 4px; cursor: pointer; 
+            margin: 5px; font-size: 14px;
+        }
+        .btn-copy:hover { background: #d0d0d0; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+    <button class="btn-copy" onclick="copyCode('addcart')">add_to_cart.php</button>
+    <button class="btn-copy" onclick="copyCode('removecart')">remove_from_cart.php</button>
+    <button class="btn-copy" onclick="copyCode('cart')">cart.php</button>
+    <button class="btn-copy" onclick="copyCode('reviews')">Отзывы</button>
+    <button class="btn-copy" onclick="copyCode('feedback')">Форма + модалка</button>
+    <button class="btn-copy" onclick="copyCode('products')">Вывод товаров</button>
+
+    <pre id="addcart" class="hidden">&lt;?php
+session_start();
+if (!isset($_SESSION['cart'])) $_SESSION['cart'] = [];
+$id = $_GET['id'] ?? 0;
+if ($id) $_SESSION['cart'][$id] = ($_SESSION['cart'][$id] ?? 0) + 1;
+header('Location: index.php');
+?&gt;</pre>
+
+    <pre id="removecart" class="hidden">&lt;?php
+session_start();
+$id = $_GET['id'] ?? 0;
+if ($id && isset($_SESSION['cart'][$id])) unset($_SESSION['cart'][$id]);
+header('Location: cart.php');
+?&gt;</pre>
+
+    <pre id="cart" class="hidden">&lt;?php session_start(); ?&gt;
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;&lt;title&gt;Корзина&lt;/title&gt;
+&lt;link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;div class="container mt-4"&gt;
+    &lt;h1&gt;Корзина&lt;/h1&gt;
+    &lt;a href="index.php" class="btn btn-secondary"&gt;← На главную&lt;/a&gt;
+    &lt;?php if (empty($_SESSION['cart'])): ?&gt;
+        &lt;div class="alert alert-info"&gt;Пусто&lt;/div&gt;
+    &lt;?php else: ?&gt;
+        &lt;table class="table table-bordered"&gt;
+            &lt;tr&gt;&lt;th&gt;Товар&lt;/th&gt;&lt;th&gt;Кол-во&lt;/th&gt;&lt;th&gt;&lt;/th&gt;&lt;/tr&gt;
+            &lt;?php foreach ($_SESSION['cart'] as $id => $qty): ?&gt;
+            &lt;tr&gt;&lt;td&gt;Товар #&lt;?= $id ?&gt;&lt;/td&gt;&lt;td&gt;&lt;?= $qty ?&gt;&lt;/td&gt;
+            &lt;td&gt;&lt;a href="remove_from_cart.php?id=&lt;?= $id ?&gt;" class="btn btn-danger btn-sm"&gt;Удалить&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+            &lt;?php endforeach; ?&gt;
+        &lt;/table&gt;
+        &lt;b&gt;Итого: &lt;?= array_sum($_SESSION['cart']) ?&gt; товаров&lt;/b&gt;
+    &lt;?php endif; ?&gt;
+&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+
+    <pre id="reviews" class="hidden">&lt;div class="container mt-4"&gt;
+    &lt;h3&gt;Отзывы&lt;/h3&gt;
+    &lt;textarea id="reviewInput" class="form-control" rows="2" placeholder="Ваш отзыв..."&gt;&lt;/textarea&gt;
+    &lt;button class="btn btn-primary mt-2" onclick="addReview()"&gt;Отправить&lt;/button&gt;
+    &lt;div id="reviewsList" class="mt-3"&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;script&gt;
+function addReview() {
+    let t = document.getElementById('reviewInput').value.trim();
+    if (!t) return alert('Напишите отзыв');
+    let d = document.createElement('div');
+    d.className = 'border p-2 mt-2';
+    d.textContent = t;
+    document.getElementById('reviewsList').appendChild(d);
+    document.getElementById('reviewInput').value = '';
+    new bootstrap.Modal(document.getElementById('feedbackModal')).show();
+}
+&lt;/script&gt;</pre>
+
+    <pre id="feedback" class="hidden">&lt;div class="container mt-4"&gt;
+    &lt;div class="card"&gt;
+        &lt;div class="card-header bg-primary text-white"&gt;Обратная связь&lt;/div&gt;
+        &lt;div class="card-body"&gt;
+            &lt;input type="text" id="fbName" class="form-control mb-2" placeholder="Имя"&gt;
+            &lt;input type="email" id="fbEmail" class="form-control mb-2" placeholder="Email"&gt;
+            &lt;textarea id="fbMsg" class="form-control mb-2" rows="2" placeholder="Сообщение"&gt;&lt;/textarea&gt;
+            &lt;button class="btn btn-primary" onclick="sendFeedback()"&gt;Отправить&lt;/button&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="modal fade" id="feedbackModal"&gt;
+    &lt;div class="modal-dialog"&gt;&lt;div class="modal-content"&gt;
+        &lt;div class="modal-header bg-success text-white"&gt;&lt;h5&gt;Ваше сообщение принято&lt;/h5&gt;
+        &lt;button class="btn-close" data-bs-dismiss="modal"&gt;&lt;/button&gt;&lt;/div&gt;
+        &lt;div class="modal-body"&gt;Спасибо!&lt;/div&gt;
+    &lt;/div&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;script&gt;
+function sendFeedback() {
+    let n = document.getElementById('fbName').value.trim();
+    let e = document.getElementById('fbEmail').value.trim();
+    let m = document.getElementById('fbMsg').value.trim();
+    if (!n || !e || !m) return alert('Заполните все поля');
+    document.getElementById('fbName').value = '';
+    document.getElementById('fbEmail').value = '';
+    document.getElementById('fbMsg').value = '';
+    new bootstrap.Modal(document.getElementById('feedbackModal')).show();
+}
+&lt;/script&gt;</pre>
+
+    <pre id="products" class="hidden">&lt;div class="row"&gt;
+    &lt;?php
+    $res = $conn-&gt;query("SELECT * FROM products");
+    while ($p = $res-&gt;fetch_assoc()):
+    ?&gt;
+    &lt;div class="col-md-4 mb-3"&gt;
+        &lt;div class="card"&gt;
+            &lt;img src="img/&lt;?= $p['image'] ?&gt;" class="card-img-top" style="height:200px;object-fit:cover;"&gt;
+            &lt;div class="card-body"&gt;
+                &lt;h5&gt;&lt;?= $p['name'] ?&gt;&lt;/h5&gt;
+                &lt;p&gt;&lt;?= $p['description'] ?&gt;&lt;/p&gt;
+                &lt;b&gt;&lt;?= number_format($p['price']) ?&gt; ₽&lt;/b&gt;
+                &lt;a href="add_to_cart.php?id=&lt;?= $p['id'] ?&gt;" class="btn btn-success w-100"&gt;Купить&lt;/a&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;?php endwhile; ?&gt;
+&lt;/div&gt;</pre>
+
+    <script>
+        function copyCode(id) {
+            const el = document.getElementById(id);
+            const text = el.textContent.trim();
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Скопировано!');
+            }).catch(() => {
+                const ta = document.createElement('textarea');
+                ta.value = text;
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                document.body.removeChild(ta);
+                alert('Скопировано!');
+            });
+        }
+    </script>
+
+</body>
+</html>
