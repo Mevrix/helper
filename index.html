@@ -144,11 +144,9 @@ function sendFeedback() {
     &lt;?php endwhile; ?&gt;
 &lt;/div&gt;</pre>
 
-    <pre id="btn_login" class="hidden">&lt;!-- Кнопка "Войти" (открывает модалку) --&gt;
-&lt;button class="btn btn-outline-light" data-bs-toggle="modal" data-bs-target="#loginModal"&gt;Войти&lt;/button&gt;</pre>
+    <pre id="btn_login" class="hidden">&lt;button class="btn btn-outline-light" data-bs-toggle="modal" data-bs-target="#loginModal"&gt;Войти&lt;/button&gt;</pre>
 
-    <pre id="btn_cart" class="hidden">&lt;!-- Кнопка "Корзина" (ссылка на страницу) --&gt;
-&lt;a href="cart.php" class="btn btn-outline-light"&gt;Корзина &lt;span class="badge bg-danger"&gt;&lt;?= array_sum($_SESSION['cart']) ?&gt;&lt;/span&gt;&lt;/a&gt;</pre>
+    <pre id="btn_cart" class="hidden">&lt;a href="cart.php" class="btn btn-outline-light"&gt;Корзина &lt;span class="badge bg-danger"&gt;&lt;?= array_sum($_SESSION['cart']) ?&gt;&lt;/span&gt;&lt;/a&gt;</pre>
 
     <script>
         function copyCode(id) {
