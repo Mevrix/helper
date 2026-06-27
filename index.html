@@ -12,16 +12,27 @@
         }
         .btn-copy:hover { background: #d0d0d0; }
         .hidden { display: none; }
+        .group { margin: 8px 0; }
     </style>
 </head>
 <body>
 
-    <button class="btn-copy" onclick="copyCode('addcart')">add_to_cart.php</button>
-    <button class="btn-copy" onclick="copyCode('removecart')">remove_from_cart.php</button>
-    <button class="btn-copy" onclick="copyCode('cart')">cart.php</button>
-    <button class="btn-copy" onclick="copyCode('reviews')">Отзывы</button>
-    <button class="btn-copy" onclick="copyCode('feedback')">Форма + модалка</button>
-    <button class="btn-copy" onclick="copyCode('products')">Вывод товаров</button>
+    <div class="group">
+        <button class="btn-copy" onclick="copyCode('addcart')">add_to_cart.php</button>
+        <button class="btn-copy" onclick="copyCode('removecart')">remove_from_cart.php</button>
+        <button class="btn-copy" onclick="copyCode('cart')">cart.php</button>
+    </div>
+
+    <div class="group">
+        <button class="btn-copy" onclick="copyCode('reviews')">Отзывы</button>
+        <button class="btn-copy" onclick="copyCode('feedback')">Форма + модалка</button>
+        <button class="btn-copy" onclick="copyCode('products')">Вывод товаров</button>
+    </div>
+
+    <div class="group">
+        <button class="btn-copy" onclick="copyCode('btn_login')">Кнопка "Войти"</button>
+        <button class="btn-copy" onclick="copyCode('btn_cart')">Кнопка "Корзина"</button>
+    </div>
 
     <pre id="addcart" class="hidden">&lt;?php
 session_start();
@@ -132,6 +143,12 @@ function sendFeedback() {
     &lt;/div&gt;
     &lt;?php endwhile; ?&gt;
 &lt;/div&gt;</pre>
+
+    <pre id="btn_login" class="hidden">&lt;!-- Кнопка "Войти" (открывает модалку) --&gt;
+&lt;button class="btn btn-outline-light" data-bs-toggle="modal" data-bs-target="#loginModal"&gt;Войти&lt;/button&gt;</pre>
+
+    <pre id="btn_cart" class="hidden">&lt;!-- Кнопка "Корзина" (ссылка на страницу) --&gt;
+&lt;a href="cart.php" class="btn btn-outline-light"&gt;Корзина &lt;span class="badge bg-danger"&gt;&lt;?= array_sum($_SESSION['cart']) ?&gt;&lt;/span&gt;&lt;/a&gt;</pre>
 
     <script>
         function copyCode(id) {
