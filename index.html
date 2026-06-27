@@ -32,7 +32,30 @@
     <div class="group">
         <button class="btn-copy" onclick="copyCode('btn_login')">Кнопка "Войти"</button>
         <button class="btn-copy" onclick="copyCode('btn_cart')">Кнопка "Корзина"</button>
+        <button class="btn-copy" onclick="copyCode('db')">db.php</button>
+        <button class="btn-copy" onclick="copyCode('sql')">SQL (CREATE + INSERT)</button>
     </div>
+
+    <pre id="db" class="hidden">&lt;?php
+$conn = new mysqli('localhost', 'root', '', 'exam');
+session_start();
+if (!isset($_SESSION['cart'])) $_SESSION['cart'] = [];
+?&gt;</pre>
+
+    <pre id="sql" class="hidden">CREATE TABLE tovar (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100),
+    price INT,
+    description TEXT,
+    image VARCHAR(100)
+);
+
+INSERT INTO tovar (name, price, description, image) VALUES
+('Товар 1', 1000, 'Описание 1', '1.jpg'),
+('Товар 2', 2000, 'Описание 2', '2.jpg'),
+('Товар 3', 3000, 'Описание 3', '3.jpg'),
+('Товар 4', 4000, 'Описание 4', '4.jpg'),
+('Товар 5', 5000, 'Описание 5', '5.jpg');</pre>
 
     <pre id="addcart" class="hidden">&lt;?php
 session_start();
@@ -61,15 +84,32 @@ header('Location: cart.php');
     &lt;a href="index.php" class="btn btn-secondary"&gt;← На главную&lt;/a&gt;
     &lt;?php if (empty($_SESSION['cart'])): ?&gt;
         &lt;div class="alert alert-info"&gt;Пусто&lt;/div&gt;
-    &lt;?php else: ?&gt;
-        &lt;table class="table table-bordered"&gt;
-            &lt;tr&gt;&lt;th&gt;Товар&lt;/th&gt;&lt;th&gt;Кол-во&lt;/th&gt;&lt;th&gt;&lt;/th&gt;&lt;/tr&gt;
-            &lt;?php foreach ($_SESSION['cart'] as $id => $qty): ?&gt;
-            &lt;tr&gt;&lt;td&gt;Товар #&lt;?= $id ?&gt;&lt;/td&gt;&lt;td&gt;&lt;?= $qty ?&gt;&lt;/td&gt;
-            &lt;td&gt;&lt;a href="remove_from_cart.php?id=&lt;?= $id ?&gt;" class="btn btn-danger btn-sm"&gt;Удалить&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
-            &lt;?php endforeach; ?&gt;
-        &lt;/table&gt;
-        &lt;b&gt;Итого: &lt;?= array_sum($_SESSION['cart']) ?&gt; товаров&lt;/b&gt;
+    &lt;?php else:
+        $ids = array_keys($_SESSION['cart']);
+        $in = implode(',', array_fill(0, count($ids), '?'));
+        $stmt = $conn-&gt;prepare("SELECT id, name, price FROM tovar WHERE id IN ($in)");
+        $stmt-&gt;bind_param(str_repeat('i', count($ids)), ...$ids);
+        $stmt-&gt;execute();
+        $result = $stmt-&gt;get_result();
+        $total = 0;
+    ?&gt;
+    &lt;table class="table table-bordered"&gt;
+        &lt;tr&gt;&lt;th&gt;Товар&lt;/th&gt;&lt;th&gt;Цена&lt;/th&gt;&lt;th&gt;Кол-во&lt;/th&gt;&lt;th&gt;Сумма&lt;/th&gt;&lt;th&gt;&lt;/th&gt;&lt;/tr&gt;
+        &lt;?php while ($p = $result-&gt;fetch_assoc()):
+            $qty = $_SESSION['cart'][$p['id']];
+            $sum = $p['price'] * $qty;
+            $total += $sum;
+        ?&gt;
+        &lt;tr&gt;
+            &lt;td&gt;&lt;?= $p['name'] ?&gt;&lt;/td&gt;
+            &lt;td&gt;&lt;?= number_format($p['price']) ?&gt; ₽&lt;/td&gt;
+            &lt;td&gt;&lt;?= $qty ?&gt;&lt;/td&gt;
+            &lt;td&gt;&lt;?= number_format($sum) ?&gt; ₽&lt;/td&gt;
+            &lt;td&gt;&lt;a href="remove_from_cart.php?id=&lt;?= $p['id'] ?&gt;" class="btn btn-danger btn-sm"&gt;Удалить&lt;/a&gt;&lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;?php endwhile; ?&gt;
+        &lt;tr class="table-success"&gt;&lt;th colspan="3"&gt;Итого&lt;/th&gt;&lt;th&gt;&lt;?= number_format($total) ?&gt; ₽&lt;/th&gt;&lt;th&gt;&lt;/th&gt;&lt;/tr&gt;
+    &lt;/table&gt;
     &lt;?php endif; ?&gt;
 &lt;/div&gt;
 &lt;/body&gt;
@@ -127,7 +167,7 @@ function sendFeedback() {
 
     <pre id="products" class="hidden">&lt;div class="row"&gt;
     &lt;?php
-    $res = $conn-&gt;query("SELECT * FROM products");
+    $res = $conn-&gt;query("SELECT * FROM tovar");
     while ($p = $res-&gt;fetch_assoc()):
     ?&gt;
     &lt;div class="col-md-4 mb-3"&gt;
