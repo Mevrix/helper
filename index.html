@@ -25,37 +25,8 @@
 
     <div class="group">
         <button class="btn-copy" onclick="copyCode('reviews')">Отзывы</button>
-        <button class="btn-copy" onclick="copyCode('feedback')">Форма + модалка</button>
-        <button class="btn-copy" onclick="copyCode('products')">Вывод товаров</button>
+        <button class="btn-copy" onclick="copyCode('feedback')">Обратная связь</button>
     </div>
-
-    <div class="group">
-        <button class="btn-copy" onclick="copyCode('btn_login')">Кнопка "Войти"</button>
-        <button class="btn-copy" onclick="copyCode('btn_cart')">Кнопка "Корзина"</button>
-        <button class="btn-copy" onclick="copyCode('db')">db.php</button>
-        <button class="btn-copy" onclick="copyCode('sql')">SQL (CREATE + INSERT)</button>
-    </div>
-
-    <pre id="db" class="hidden">&lt;?php
-$conn = new mysqli('localhost', 'root', '', 'exam');
-session_start();
-if (!isset($_SESSION['cart'])) $_SESSION['cart'] = [];
-?&gt;</pre>
-
-    <pre id="sql" class="hidden">CREATE TABLE tovar (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(100),
-    price INT,
-    description TEXT,
-    image VARCHAR(100)
-);
-
-INSERT INTO tovar (name, price, description, image) VALUES
-('Товар 1', 1000, 'Описание 1', '1.jpg'),
-('Товар 2', 2000, 'Описание 2', '2.jpg'),
-('Товар 3', 3000, 'Описание 3', '3.jpg'),
-('Товар 4', 4000, 'Описание 4', '4.jpg'),
-('Товар 5', 5000, 'Описание 5', '5.jpg');</pre>
 
     <pre id="addcart" class="hidden">&lt;?php
 session_start();
@@ -72,7 +43,7 @@ if ($id && isset($_SESSION['cart'][$id])) unset($_SESSION['cart'][$id]);
 header('Location: cart.php');
 ?&gt;</pre>
 
-    <pre id="cart" class="hidden">&lt;?php session_start(); ?&gt;
+    <pre id="cart" class="hidden">&lt;?php require 'db.php'; ?&gt;
 &lt;!DOCTYPE html&gt;
 &lt;html&gt;
 &lt;head&gt;&lt;title&gt;Корзина&lt;/title&gt;
@@ -115,78 +86,53 @@ header('Location: cart.php');
 &lt;/body&gt;
 &lt;/html&gt;</pre>
 
-    <pre id="reviews" class="hidden">&lt;div class="container mt-4"&gt;
-    &lt;h3&gt;Отзывы&lt;/h3&gt;
-    &lt;textarea id="reviewInput" class="form-control" rows="2" placeholder="Ваш отзыв..."&gt;&lt;/textarea&gt;
-    &lt;button class="btn btn-primary mt-2" onclick="addReview()"&gt;Отправить&lt;/button&gt;
-    &lt;div id="reviewsList" class="mt-3"&gt;&lt;/div&gt;
-&lt;/div&gt;
-&lt;script&gt;
-function addReview() {
-    let t = document.getElementById('reviewInput').value.trim();
-    if (!t) return;
-    let d = document.createElement('div');
-    d.className = 'border p-2 mt-2';
-    d.textContent = t;
-    document.getElementById('reviewsList').appendChild(d);
-    document.getElementById('reviewInput').value = '';
-    new bootstrap.Modal(document.getElementById('feedbackModal')).show();
-}
-&lt;/script&gt;</pre>
-
-    <pre id="feedback" class="hidden">&lt;div class="container mt-4"&gt;
-    &lt;div class="card"&gt;
-        &lt;div class="card-header bg-primary text-white"&gt;Обратная связь&lt;/div&gt;
-        &lt;div class="card-body"&gt;
-            &lt;input type="text" id="fbName" class="form-control mb-2" placeholder="Имя"&gt;
-            &lt;input type="email" id="fbEmail" class="form-control mb-2" placeholder="Email"&gt;
-            &lt;textarea id="fbMsg" class="form-control mb-2" rows="2" placeholder="Сообщение"&gt;&lt;/textarea&gt;
-            &lt;button class="btn btn-primary" onclick="sendFeedback()"&gt;Отправить&lt;/button&gt;
-        &lt;/div&gt;
+    <pre id="reviews" class="hidden">&lt;!-- Отзывы --&gt;
+&lt;div class="container mb-4"&gt;
+    &lt;h2&gt;Отзывы&lt;/h2&gt;
+    &lt;div class="row row-gap-2"&gt;
+        &lt;input type="text" id="login" placeholder="Введите ваше имя"&gt;
+        &lt;textarea id="otziv" placeholder="Введите ваш отзыв"&gt;&lt;/textarea&gt;
+        &lt;button class="btn btn-primary" onclick="sendReview()"&gt;Отправить&lt;/button&gt;
     &lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="modal fade" id="feedbackModal"&gt;
-    &lt;div class="modal-dialog"&gt;&lt;div class="modal-content"&gt;
-        &lt;div class="modal-header bg-success text-white"&gt;&lt;h5&gt;Ваше сообщение принято&lt;/h5&gt;
-        &lt;button class="btn-close" data-bs-dismiss="modal"&gt;&lt;/button&gt;&lt;/div&gt;
-        &lt;div class="modal-body"&gt;Спасибо!&lt;/div&gt;
-    &lt;/div&gt;&lt;/div&gt;
+    &lt;div id="list"&gt;&lt;/div&gt;
 &lt;/div&gt;
 &lt;script&gt;
-function sendFeedback() {
-    let n = document.getElementById('fbName').value.trim();
-    let e = document.getElementById('fbEmail').value.trim();
-    let m = document.getElementById('fbMsg').value.trim();
-    if (!n || !e || !m) return;
-    document.getElementById('fbName').value = '';
-    document.getElementById('fbEmail').value = '';
-    document.getElementById('fbMsg').value = '';
-    new bootstrap.Modal(document.getElementById('feedbackModal')).show();
+function sendReview() {
+    let a = document.getElementById('login').value.trim();
+    let b = document.getElementById('otziv').value.trim();
+    if (a && b) {
+        document.getElementById('list').innerHTML += '&lt;div class="border bg-dark text-white p-2 mt-2"&gt;' + a + '&lt;/div&gt;';
+        document.getElementById('list').innerHTML += '&lt;div class="border p-2 mb-4"&gt;' + b + '&lt;/div&gt;';
+        document.getElementById('login').value = '';
+        document.getElementById('otziv').value = '';
+    }
 }
 &lt;/script&gt;</pre>
 
-    <pre id="products" class="hidden">&lt;div class="row"&gt;
-    &lt;?php
-    $res = $conn-&gt;query("SELECT * FROM tovar");
-    while ($p = $res-&gt;fetch_assoc()):
-    ?&gt;
-    &lt;div class="col-md-4 mb-3"&gt;
-        &lt;div class="card"&gt;
-            &lt;img src="img/&lt;?= $p['image'] ?&gt;" class="card-img-top" style="height:200px;object-fit:cover;"&gt;
-            &lt;div class="card-body"&gt;
-                &lt;h5&gt;&lt;?= $p['name'] ?&gt;&lt;/h5&gt;
-                &lt;p&gt;&lt;?= $p['description'] ?&gt;&lt;/p&gt;
-                &lt;b&gt;&lt;?= number_format($p['price']) ?&gt; ₽&lt;/b&gt;
-                &lt;a href="add_to_cart.php?id=&lt;?= $p['id'] ?&gt;" class="btn btn-success w-100"&gt;Купить&lt;/a&gt;
+    <pre id="feedback" class="hidden">&lt;!-- Форма обратной связи --&gt;
+&lt;div class="container mb-2"&gt;
+    &lt;h2&gt;Свяжитесь с нами&lt;/h2&gt;
+    &lt;form action="#" class="form row row-gap-2"&gt;
+        &lt;input type="email" placeholder="Введите ваш email"&gt;
+        &lt;input type="number" placeholder="Введите ваш номер телефона"&gt;
+        &lt;textarea placeholder="Введите вашу причину"&gt;&lt;/textarea&gt;
+        &lt;button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#myModal"&gt;Отправить&lt;/button&gt;
+    &lt;/form&gt;
+&lt;/div&gt;
+&lt;!-- Модалка --&gt;
+&lt;div class="modal fade" id="myModal"&gt;
+    &lt;div class="modal-dialog"&gt;
+        &lt;div class="modal-content"&gt;
+            &lt;div class="modal-header bg-success text-white"&gt;
+                &lt;h5&gt;Ваше сообщение принято&lt;/h5&gt;
+                &lt;button class="btn-close" data-bs-dismiss="modal"&gt;&lt;/button&gt;
+            &lt;/div&gt;
+            &lt;div class="modal-body"&gt;
+                &lt;h5&gt;Спасибо за обратную связь!&lt;/h5&gt;
             &lt;/div&gt;
         &lt;/div&gt;
     &lt;/div&gt;
-    &lt;?php endwhile; ?&gt;
 &lt;/div&gt;</pre>
-
-    <pre id="btn_login" class="hidden">&lt;button class="btn btn-outline-light" data-bs-toggle="modal" data-bs-target="#loginModal"&gt;Войти&lt;/button&gt;</pre>
-
-    <pre id="btn_cart" class="hidden">&lt;a href="cart.php" class="btn btn-outline-light"&gt;Корзина &lt;span class="badge bg-danger"&gt;&lt;?= array_sum($_SESSION['cart']) ?&gt;&lt;/span&gt;&lt;/a&gt;</pre>
 
     <script>
         function copyCode(id) {
